@@ -38,7 +38,7 @@ initial_fun <- function() {
   configs_list <- lapply(seq_len(nrow(csv_data)), function(i) {
     list(id = paste0(csv_data$datasetID[i], "_", csv_data$configID[i]),
          title = csv_data$configTitle[i],
-         dataset = csv_data$datasetID[i],
+         datasets = csv_data$datasetID[i],
          uri = csv_data$configURI[i],
          description = csv_data$configDescription[i])
   })
