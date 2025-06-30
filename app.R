@@ -6,43 +6,45 @@ library(BiocFileCache)
 
 bfc <- BiocFileCache(cache = tempdir())
 
-csvsource <- "https://raw.githubusercontent.com/Bioconductor/isee.bioconductor.org/refs/heads/devel/config.csv"
+csvsourcedata <- "https://raw.githubusercontent.com/Bioconductor/isee.bioconductor.org/refs/heads/devel/config-dataset.csv"
+csvsourceinitial <- "https://raw.githubusercontent.com/Bioconductor/isee.bioconductor.org/refs/heads/devel/config-initial.csv"
 
 # Read and parse the CSV data
-csv_data <- read.csv(csvsource)
+csv_data <- read.csv(csvsourcedata)
+csv_initial <- read.csv(csvsourceinitial)
 
 dataset_fun <- function() {
-  # Get unique datasets from the CSV
-  unique_datasets <- unique(csv_data[, c("datasetID", "datasetTitle", "datasetURI", "datasetDescription")])
-  
-  if (nrow(unique_datasets) == 0) {
+  # datasetID column must be unique
+  stopifnot(all(!duplicated(csv_data$datasetID)))
+
+  if (nrow(csv_data) == 0) {
     return(list())
   }
-  
-  datasets_list <- lapply(seq_len(nrow(unique_datasets)), function(i) {
-    list(id = unique_datasets$datasetID[i],
-         title = unique_datasets$datasetTitle[i],
-         uri = unique_datasets$datasetURI[i],
-         description = unique_datasets$datasetDescription[i])
+
+  datasets_list <- lapply(seq_len(nrow(csv_data)), function(i) {
+    list(id = csv_data$datasetID[i],
+         title = csv_data$datasetTitle[i],
+         uri = csv_data$datasetURI[i],
+         description = csv_data$datasetDescription[i])
   })
-  
+
   return(datasets_list)
 }
 
 initial_fun <- function() {
   # Create initial configurations from CSV
-  if (nrow(csv_data) == 0) {
+  if (nrow(csv_initial) == 0) {
     return(list())
   }
-  
-  configs_list <- lapply(seq_len(nrow(csv_data)), function(i) {
-    list(id = paste0(csv_data$datasetID[i], "_", csv_data$configID[i]),
-         title = csv_data$configTitle[i],
-         datasets = csv_data$datasetID[i],
-         uri = csv_data$configURI[i],
-         description = csv_data$configDescription[i])
+
+  configs_list <- lapply(seq_len(nrow(csv_initial)), function(i) {
+    list(id = paste0(csv_initial$datasetID[i], "_", csv_initial$configID[i]),
+         title = csv_initial$configTitle[i],
+         datasets = csv_initial$datasetID[i],
+         uri = csv_initial$configURI[i],
+         description = csv_initial$configDescription[i])
   })
-  
+
   return(configs_list)
 }
 
